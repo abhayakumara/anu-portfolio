@@ -18,17 +18,45 @@ import { profile } from "@/data/resume";
 
 type Status = "idle" | "loading" | "success" | "error";
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function Contact() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "", company: "" });
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const fieldError = (field: keyof typeof form): string | null => {
+    if (!touched[field]) return null;
+    if (field === "name" && !form.name.trim()) return "Please enter your name.";
+    if (field === "email") {
+      if (!form.email.trim()) return "Please enter your email.";
+      if (!emailRegex.test(form.email.trim())) return "Enter a valid email address.";
+    }
+    if (field === "message") {
+      if (!form.message.trim()) return "Please enter a message.";
+      if (form.message.trim().length < 5) return "Message is too short.";
+    }
+    return null;
+  };
 
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
+  const onBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setTouched((t) => ({ ...t, [e.target.name]: true }));
+
+  const isValid =
+    form.name.trim() &&
+    emailRegex.test(form.email.trim()) &&
+    form.message.trim().length >= 5;
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTouched({ name: true, email: true, message: true });
+    if (!isValid || status === "loading" || status === "success") return;
+
     setStatus("loading");
     setError("");
     try {
@@ -40,8 +68,9 @@ export default function Contact() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
       setStatus("success");
-      setForm({ name: "", email: "", message: "" });
-      setTimeout(() => setStatus("idle"), 5000);
+      setForm({ name: "", email: "", message: "", company: "" });
+      setTouched({});
+      setTimeout(() => setStatus("idle"), 6000);
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -86,7 +115,11 @@ export default function Contact() {
                   </>
                 );
                 return href ? (
-                  <a key={label} href={href} className="flex items-center gap-4 transition-opacity hover:opacity-80">
+                  <a
+                    key={label}
+                    href={href}
+                    className="flex items-center gap-4 transition-opacity hover:opacity-80"
+                  >
                     {inner}
                   </a>
                 ) : (
@@ -98,24 +131,12 @@ export default function Contact() {
             </div>
 
             <div className="mt-7 flex gap-3">
-              <a
-                href={profile.socials.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="grid h-11 w-11 place-items-center rounded-xl glass text-slate-300 transition-all hover:scale-110 hover:text-white"
-              >
+              <SocialLink href={profile.socials.github} label="GitHub">
                 <Github className="h-5 w-5" />
-              </a>
-              <a
-                href={profile.socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="grid h-11 w-11 place-items-center rounded-xl glass text-slate-300 transition-all hover:scale-110 hover:text-white"
-              >
+              </SocialLink>
+              <SocialLink href={profile.socials.linkedin} label="LinkedIn">
                 <Linkedin className="h-5 w-5" />
-              </a>
+              </SocialLink>
             </div>
           </div>
 
@@ -125,7 +146,9 @@ export default function Contact() {
             className="card-glow group flex items-center justify-between rounded-2xl glass p-6 transition-colors hover:bg-white/[0.06]"
           >
             <div>
-              <div className="font-display text-base font-semibold text-white">Download my resume</div>
+              <div className="font-display text-base font-semibold text-white">
+                Download my resume
+              </div>
               <div className="text-sm text-slate-400">Grab the full PDF version</div>
             </div>
             <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-accent to-cyan-glow text-white transition-transform group-hover:scale-110">
@@ -137,43 +160,62 @@ export default function Contact() {
         {/* Right: form */}
         <motion.form
           onSubmit={onSubmit}
+          noValidate
           initial={{ opacity: 0, x: 24 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           className="card-glow rounded-2xl glass p-7"
         >
+          {/* honeypot */}
+          <input
+            type="text"
+            name="company"
+            value={form.company}
+            onChange={onChange}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute left-[-9999px] h-0 w-0 opacity-0"
+          />
+
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Name">
+            <Field label="Name" error={fieldError("name")}>
               <input
                 required
                 name="name"
                 value={form.name}
                 onChange={onChange}
+                onBlur={onBlur}
                 placeholder="Your name"
+                aria-invalid={!!fieldError("name")}
                 className="input"
               />
             </Field>
-            <Field label="Email">
+            <Field label="Email" error={fieldError("email")}>
               <input
                 required
                 type="email"
                 name="email"
                 value={form.email}
                 onChange={onChange}
+                onBlur={onBlur}
                 placeholder="you@example.com"
+                aria-invalid={!!fieldError("email")}
                 className="input"
               />
             </Field>
           </div>
           <div className="mt-5">
-            <Field label="Message">
+            <Field label="Message" error={fieldError("message")}>
               <textarea
                 required
                 name="message"
                 value={form.message}
                 onChange={onChange}
+                onBlur={onBlur}
                 rows={5}
                 placeholder="Tell me about your project or role…"
+                aria-invalid={!!fieldError("message")}
                 className="input resize-none"
               />
             </Field>
@@ -182,12 +224,11 @@ export default function Contact() {
           <button
             type="submit"
             disabled={status === "loading" || status === "success"}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-cyan-glow px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-accent/30 transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-cyan-glow px-6 py-3.5 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" />}
             {status === "success" && <CheckCircle2 className="h-4 w-4" />}
-            {status === "idle" && <Send className="h-4 w-4" />}
-            {status === "error" && <Send className="h-4 w-4" />}
+            {(status === "idle" || status === "error") && <Send className="h-4 w-4" />}
             {status === "loading"
               ? "Sending…"
               : status === "success"
@@ -195,46 +236,58 @@ export default function Contact() {
               : "Send message"}
           </button>
 
-          {status === "success" && (
-            <p className="mt-3 text-center text-sm text-emerald-400">
-              Thanks for reaching out — I&apos;ll reply soon.
-            </p>
-          )}
-          {status === "error" && (
-            <p className="mt-3 text-center text-sm text-rose-400">{error}</p>
-          )}
+          <div aria-live="polite" className="min-h-[1.25rem]">
+            {status === "success" && (
+              <p className="mt-3 text-center text-sm text-emerald-400">
+                Thanks for reaching out — I&apos;ll reply soon.
+              </p>
+            )}
+            {status === "error" && (
+              <p className="mt-3 text-center text-sm text-rose-400">{error}</p>
+            )}
+          </div>
         </motion.form>
       </div>
-
-      <style jsx>{`
-        :global(.input) {
-          width: 100%;
-          border-radius: 0.75rem;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          background: rgba(255, 255, 255, 0.03);
-          padding: 0.75rem 1rem;
-          font-size: 0.875rem;
-          color: #fff;
-          outline: none;
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        :global(.input::placeholder) {
-          color: #64748b;
-        }
-        :global(.input:focus) {
-          border-color: rgba(124, 92, 255, 0.6);
-          box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15);
-        }
-      `}</style>
     </section>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function SocialLink({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className="grid h-11 w-11 place-items-center rounded-xl glass text-slate-300 transition-all hover:scale-110 hover:text-white"
+    >
+      {children}
+    </a>
+  );
+}
+
+function Field({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string | null;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-xs font-medium text-slate-400">{label}</span>
       {children}
+      {error && <span className="mt-1 block text-xs text-rose-400">{error}</span>}
     </label>
   );
 }

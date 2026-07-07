@@ -180,35 +180,88 @@ export const education: Education[] = [
   },
 ];
 
-export const projects = [
+export type Project = {
+  title: string;
+  blurb: string;
+  tags: string[];
+  challenge: string;
+  achievement: string;
+  github: string;
+};
+
+export const projects: Project[] = [
   {
     title: "Analytics Dashboard Platform",
     blurb:
-      "Full stack React.js analytics dashboard with Google Charts and dynamic multi-level filters, serving 10,000+ users with a 40% faster report-generation flow.",
+      "Full stack React.js analytics dashboard with Google Charts and dynamic multi-level filters, serving 10,000+ users.",
     tags: ["React.js", "Context API", "Google Charts", "Golang", "REST APIs"],
+    challenge:
+      "Rendering large, deeply-filterable datasets without janky re-renders while keeping the first load fast.",
+    achievement:
+      "Cut report-generation time by 40% and initial load by 57% via code-splitting, memoisation & lazy loading.",
+    github: profile.socials.github,
   },
   {
     title: "International Certificate Microservices",
     blurb:
-      "Golang microservices handling international certificate processing across multiple integrated systems, with a Redis caching layer cutting data-retrieval latency by 60%.",
+      "Golang microservices handling international certificate processing across multiple integrated systems.",
     tags: ["Golang", "Gin", "Microservices", "Redis", "Concurrency"],
+    challenge:
+      "High data-retrieval latency across multi-system integrations under peak concurrent load.",
+    achievement:
+      "Introduced a Redis caching layer that reduced data-retrieval latency by 60%.",
+    github: profile.socials.github,
   },
   {
     title: "Self-Serve Reporting System",
     blurb:
-      "Configurable React.js reporting system built on custom hooks and reusable components, halving report-generation time and removing engineering dependency for admin reports.",
+      "Configurable React.js reporting system built on custom hooks and reusable components.",
     tags: ["React.js", "Custom Hooks", "TypeScript", "Jest"],
+    challenge:
+      "Admin users depended on engineering for every new report variation, creating a delivery bottleneck.",
+    achievement:
+      "Halved report-generation time and removed engineering dependency for admin-level reports.",
+    github: profile.socials.github,
   },
   {
     title: "Reusable Component Library",
     blurb:
-      "A shared React.js component library (hooks + Context API patterns) adopted across 8 applications, cutting duplicate code by 50% and speeding up sprint delivery.",
+      "A shared React.js component library (hooks + Context API patterns) adopted across 8 applications.",
     tags: ["React.js", "Design System", "Hooks", "Accessibility"],
+    challenge:
+      "Duplicate UI code drifted across eight applications, slowing sprints and hurting consistency.",
+    achievement:
+      "Cut duplicate code by 50% and accelerated Agile sprint delivery across the frontend team.",
+    github: profile.socials.github,
   },
   {
     title: "Planning Poker App",
     blurb:
-      "In-house Agile sprint estimation tool that became the team standard, shrinking planning sessions from 60+ minutes to under 30.",
+      "In-house Agile sprint estimation tool that became the team standard.",
     tags: ["React.js", "JavaScript ES6+", "REST API"],
+    challenge:
+      "Sprint planning sessions routinely dragged past an hour with inconsistent estimation.",
+    achievement:
+      "Became the standard estimation tool, shrinking planning sessions from 60+ to under 30 minutes.",
+    github: profile.socials.github,
   },
+];
+
+export const techMarquee = [
+  "React.js",
+  "TypeScript",
+  "Golang",
+  "Gin",
+  "Node.js",
+  "Express.js",
+  "Redis",
+  "PostgreSQL",
+  "MySQL",
+  "Docker",
+  "AWS",
+  "Jest",
+  "REST APIs",
+  "Microservices",
+  "CI/CD",
+  "WCAG 2.1",
 ];

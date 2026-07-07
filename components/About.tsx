@@ -51,6 +51,7 @@ export default function About() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ delay: i * 0.08 }}
+                whileHover={{ y: -6 }}
                 className="card-glow flex flex-col justify-between rounded-2xl glass p-5"
               >
                 <Icon className="h-6 w-6 text-accent-soft" />

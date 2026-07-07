@@ -18,6 +18,7 @@ export default function Education() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ delay: i * 0.1, duration: 0.5 }}
+            whileHover={{ y: -6 }}
             className="card-glow flex gap-5 rounded-2xl glass p-7"
           >
             <span className="grid h-12 w-12 flex-shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent/30 to-cyan-glow/20 text-accent-soft">
