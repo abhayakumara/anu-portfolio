@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       message,
     });
     return NextResponse.json(
-      { success: true, message: "Message received. Thank you!" },
+      { success: true, delivered: false, message: "Message received. Thank you!" },
       { status: 200 }
     );
   }
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { success: true, message: "Message sent. Thank you!" },
+      { success: true, delivered: true, message: "Message sent. Thank you!" },
       { status: 200 }
     );
   } catch (err) {

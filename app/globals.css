@@ -145,6 +145,7 @@ body {
     position: absolute;
     inset: -1px;
     border-radius: inherit;
+    pointer-events: none;
     padding: 1px;
     background: linear-gradient(135deg, rgba(124, 92, 255, 0.6), transparent 40%, rgba(34, 211, 238, 0.5));
     -webkit-mask:

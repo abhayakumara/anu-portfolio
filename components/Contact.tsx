@@ -25,6 +25,7 @@ export default function Contact() {
   const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", message: "", company: "" });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [fallbackMailto, setFallbackMailto] = useState<string | null>(null);
 
   const fieldError = (field: keyof typeof form): string | null => {
     if (!touched[field]) return null;
@@ -59,6 +60,7 @@ export default function Contact() {
 
     setStatus("loading");
     setError("");
+    setFallbackMailto(null);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -67,10 +69,19 @@ export default function Contact() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
+
+      // If the server accepted the message but has no email provider wired up,
+      // give the visitor a one-click prefilled email so it still reaches me.
+      if (data.delivered === false) {
+        const subject = encodeURIComponent(`Portfolio message from ${form.name}`);
+        const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
+        setFallbackMailto(`mailto:${profile.email}?subject=${subject}&body=${body}`);
+      }
+
       setStatus("success");
       setForm({ name: "", email: "", message: "", company: "" });
       setTouched({});
-      setTimeout(() => setStatus("idle"), 6000);
+      setTimeout(() => setStatus("idle"), 12000);
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -238,9 +249,17 @@ export default function Contact() {
 
           <div aria-live="polite" className="min-h-[1.25rem]">
             {status === "success" && (
-              <p className="mt-3 text-center text-sm text-emerald-400">
-                Thanks for reaching out — I&apos;ll reply soon.
-              </p>
+              <div className="mt-3 text-center text-sm text-emerald-400">
+                <p>Thanks for reaching out — I&apos;ll reply soon.</p>
+                {fallbackMailto && (
+                  <a
+                    href={fallbackMailto}
+                    className="mt-1 inline-block text-slate-400 underline decoration-dotted underline-offset-4 hover:text-white"
+                  >
+                    Prefer email? Send it directly →
+                  </a>
+                )}
+              </div>
             )}
             {status === "error" && (
               <p className="mt-3 text-center text-sm text-rose-400">{error}</p>
